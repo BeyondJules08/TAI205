@@ -1,8 +1,10 @@
 #1. Importaciones
-from fastapi import FastAPI,status,HTTPException
+from fastapi import FastAPI,status,HTTPException, Depends # HTTPException para errores, Depends para dependencias
 from typing import Optional
 import asyncio
 from pydantic import BaseModel, Field
+from fastapi.security import HTTPBasic, HTTPBasicCredentials # HTTPBasic para autenticacion basica, HTTPBasicCredentials para credenciales
+import secrets # Para comparar credenciales
 
 #2. Inicializacion de la APP
 app = FastAPI(
@@ -12,15 +14,27 @@ app = FastAPI(
     )
 # BD Ficticia
 usuarios=[
-    {"id":"1", "nombre":"Julian", "apellidos":"Villalon", "edad":"20"},
-    {"id":"2", "nombre":"Eliseo", "apellidos":"Novas", "edad":"20"},
-    {"id":"3", "nombre":"Sacatripas", "apellidos":"Ripper", "edad":"30"},
+    {"id":1, "nombre":"Julian", "apellidos":"Villalon", "edad":"20"},
+    {"id":2, "nombre":"Eliseo", "apellidos":"Novas", "edad":"20"},
+    {"id":3, "nombre":"Sacatripas", "apellidos":"Ripper", "edad":"30"},
 ]
 #Creamos el modelo
 class crear_usuario(BaseModel):
     id:int = Field(..., gt=0, description="ID del usuario")
     nombre:str = Field(..., min_length=3, max_length=50, example="Julian")
     edad:int = Field(..., ge=1, le=123, description="Edad del usuario")
+
+# Seguridad HTTP Basic
+seguridad = HTTPBasic()
+def verificar_peticion(credenciales: HTTPBasicCredentials = Depends(seguridad)):
+    userAuth = secrets.compare_digest(credenciales.username, "julian")
+    passAuth = secrets.compare_digest(credenciales.password, "585426")
+    if not (userAuth and passAuth):
+        raise HTTPException(
+            status_code= status.HTTP_401_UNAUTHORIZED,
+            detail="Credenciales invalidas",
+        )
+    return credenciales.username
 
 #3. Endpoints
 @app.get("/", tags=["Inicio"])
@@ -82,12 +96,12 @@ async def actualiza_usuario(id: str, usuario:dict):
             }
 #DELETE
 @app.delete("/v1/usuario/{id}", tags=["CRUD HTTP"])
-async def elimina_usuario(id: str):
+async def elimina_usuario(id: int, userAuth:str = Depends(verificar_peticion)):
     for usr in usuarios:
         if usr["id"] == id:
             usuarios.remove(usr)
             return {
-                "mensaje": "usuario eliminado correctamente",
+                "mensaje": f"usuario eliminado por {userAuth}",
                 "status" : "200",
                 "usuario": usuario
             }
