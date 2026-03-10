@@ -80,6 +80,7 @@ async def crear_usuario(usuario:crear_usuario): #modelo
         "status" : "200",
         "usuario":usuario
     }
+    
 #PUT
 @app.put("/v1/usuario/{id}", tags=["CRUD HTTP"])
 async def actualiza_usuario(id: str, usuario:dict):

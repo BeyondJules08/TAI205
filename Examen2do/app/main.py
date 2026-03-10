@@ -13,19 +13,20 @@ app = FastAPI(
 
 # BD Ficticia
 reservas=[
-    {"id":1, "huesped":"Julian", "fecha_de_entrada:":"17:20", "fecha_de_salida":"20:00","tipo_habitacion":"sencilla", "dias_estancia":1, "estado_reserva":"confirmado"},
-    {"id":2, "huesped":"Eliseo", "fecha_de_entrada":"19:50", "fecha_de_salida":"22:00","tipo_habitacion":"doble", "dias_estancia":2, "estado_reserva":"pendiente"},
-    {"id":3, "huesped":"Sacatripas", "fecha_de_entrada":"20:40", "fecha_de_salida":"23:00","tipo_habitacion":"suite", "dias_estancia":3, "estado_reserva":"cancelado"}
+    {"id":1, "huesped":"Julian", "fecha_actual:":15,"fecha_de_entrada:":17, "fecha_de_salida":20,"tipo_habitacion":"sencilla", "dias_estancia":1, "estado_reserva":"confirmado"},
+    {"id":2, "huesped":"Eliseo", "fecha_actual:":15,"fecha_de_entrada":19, "fecha_de_salida":22,"tipo_habitacion":"doble", "dias_estancia":2, "estado_reserva":"pendiente"},
+    {"id":3, "huesped":"Sacatripas", "fecha_actual:":15,"fecha_de_entrada":20, "fecha_de_salida":23,"tipo_habitacion":"suite", "dias_estancia":3, "estado_reserva":"cancelado"}
 ]
 
-class huesped(BaseModel):
+class crear_reserva(BaseModel):
     id:int = Field(..., gt=0, description="ID del huesped")
     huesped:str = Field(..., min_length=5, max_length=50, example="Julian")
-    fecha_de_entrada:str = Field(..., ge=1, le=123, description="Fecha de entrada no menor a fecha actual")
-    fecha_de_salida:str = Field(..., ge=1, le=123, description="Fecha de salida mayor que fecha de entrada")
-    tipo_habitacion:str = Field(..., min_length=5, max_length=8, example="sencilla")
+    fecha_actual:int= Field(..., ge=1, le=2, example="15")
+    fecha_de_entrada:int = Field(...,ge=1, le=2, description="Fecha de entrada no menor a fecha actual")
+    fecha_de_salida:int= Field(..., ge=1, le=2, description="Fecha de salida mayor que fecha de entrada")
+    tipo_habitacion:str = Field(..., min_length=5, max_length=8, example="sencilla",)
     dias_estancia:int = Field(..., ge=1, le=7, description="Dias de estancia")
-    estado_reserva:str = Field(..., )
+    estado_reserva:str = Field(..., min_length=5, max_length=50, example="confirmado")
     
 seguridad = HTTPBasic()
 def verificar_peticion(credenciales: HTTPBasicCredentials = Depends(seguridad)):
@@ -72,18 +73,12 @@ async def consulta_uno(id: int):
     
 # Confirmar reserva PUT
 @app.put("/v1/reservas/{id}", tags=["CRUD HTTP"])
-async def actualiza_reserva(id: str, usuario:dict):
-    for rev in usuarios:
+async def actualiza_reserva(id: int, reserva:dict):
+    for rev in reservas:
         if rev["id"] == id:
-            rev["id"] = reserva.get("id")
-            rev["huesped"] = reserva.get("nombre")
-            rev["fecha_entrada"] = reserva.get("apellidos")
-            rev["fecha_salida"] = reserva.get("edad")
-            rev["tipo_habitacion"] = reserva.get("edad")
-            rev["dias_estancia"] = reserva.get("edad")
-            rev["estado_reserva"] = reserva.get("edad")
+            rev["estado_reserva"] = reserva.get("estado_reserva")
             return {
-                "mensaje": "usuario actualizado correctamente",
+                "mensaje": "Reserva confirmada correctamente",
                 "status" : "200",
                 "reserva": reserva
             }
