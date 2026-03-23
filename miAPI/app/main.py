@@ -5,7 +5,7 @@ from app.routers.usuarios import routerU
 
 #2. Inicializacion de la APP
 app = FastAPI(
-    title="miAPI JWT",
+    title="miAPI",
     description="Julian Santiago",
     version="1.0.0",
     )
