@@ -14,7 +14,7 @@ from datetime import datetime, timedelta, timezone
 SECRET_KEY = "b29fb2689f12fc2ce6cb71418df9827766cd1a10a251b820b603a24d1f430373"
 ALGORITHM = "HS256"
 
-# b. Generación de Tokens (incluir limite max 30 minutos)
+# b. Generacion de Tokens (incluir limite max 30 minutos)
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 password_hash = PasswordHash.recommended()
@@ -51,7 +51,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-# c. Implementar validación de tokens    # como se hacía originalmente con HTTPBasic
+# c. Implementar validacion de tokens    # como se hacia originalmente con HTTPBasic
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
